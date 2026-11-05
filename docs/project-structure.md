@@ -17,14 +17,14 @@
 │       ├── StickerContent.tsx           ← 内层组件（含 useCurrentFrame + 动画）
 │       └── styles.css
 │
-├── assets/                              ← 非指定风格的统一 PNG（可选）
-├── assets-cyberpunk/                    ← cyberpunk 风格 PNG
-├── assets-kawaii/                       ← kawaii 风格 PNG
-├── assets-neon/                         ← neon 风格 PNG
-├── assets-retro/                        ← retro 风格 PNG
-├── assets-hand-drawn/                   ← hand-drawn 风格 PNG
-├── assets-minimal/                      ← minimal 风格 PNG
-├── assets-meme/                         ← meme 风格 PNG
+├── assets/                              ← 非指定风格输出（GIF+PNG，可选）
+├── assets-cyberpunk/                    ← cyberpunk：同序号 .gif + .png
+├── assets-kawaii/                       ← kawaii：同序号 .gif + .png
+├── assets-neon/                         ← neon：同序号 .gif + .png
+├── assets-retro/                        ← retro：同序号 .gif + .png
+├── assets-hand-drawn/                   ← hand-drawn：同序号 .gif + .png
+├── assets-minimal/                      ← minimal：同序号 .gif + .png
+├── assets-meme/                         ← meme：同序号 .gif + .png
 │
 ├── content-analysis.md                  ← 内容聚合分析文档
 ├── sticker-manifest.md                  ← 贴图设计清单
@@ -38,7 +38,7 @@
 |------|------|
 | `prompts/` | 输入的贴图提示词 Markdown 文件 |
 | `remotion-sticker/` | Remotion 渲染项目（隐藏目录，生成后保留） |
-| `assets-{theme}/` | 各风格的 PNG 输出目录 |
+| `assets-{theme}/` | 各风格输出目录（每张贴图同时有 `.gif` 与 `.png`） |
 | `content-analysis.md` | 内容聚合分析文档 |
 | `sticker-manifest.md` | 贴图设计清单 |
 | `stickers.zip` | 打包后的微信贴图（可选） |
@@ -54,7 +54,7 @@ content-analysis.md + sticker-manifest.md（内容聚合）
     ↓ 阶段二
 remotion-sticker/（Remotion 项目）
     ↓
-assets-{theme}/（PNG 输出）
+assets-{theme}/（GIF + PNG 双格式）
     ↓
 stickers.zip（打包）
 ```

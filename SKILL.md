@@ -38,10 +38,17 @@ metadata:
 │  报错停止（不再降级）                                   │
 └────────────────────────────────────────────────────────┘
     ↓
-最终输出（ZIP / 公众号发布）
+最终输出（ZIP；GIF+PNG 双格式；文案只进草稿箱）
 ```
 
 **优先级**：AI → Remotion。Remotion 失败则报错，不再降级。
+
+### 双格式与分发
+
+- **同时保留 GIF + PNG**（同序号同名），不得删任一格式。
+- **GIF** → 贴图推送 / 公众号（默认优先）；**PNG** → 抖音 / 小红书（标题 ≤20 字）。
+- AI 若先出 PNG：PNG 为静图成品并保留；须再导出同名 GIF。
+- 文案与素材**只进草稿箱**；无特别说明则定时 **19:00–22:00（Asia/Shanghai）**；用户说「立即发」才立即发。
 
 ## skill 项目结构
 
@@ -102,7 +109,7 @@ Remotion 失败则报错，不再降级。
 - **中层**（StickerContent）：持有 `<Sequence>` 列表，注入 `__SEQUENCES__`
 - **内层**（StickerScene）：每张贴图的视觉组件，**使用** `useCurrentFrame()` + 5个动画函数
 
-**输出规格**：1080×1440，90帧@30fps（3秒），**GIF 动画**
+**输出规格**：1080×1440；GIF 90帧@30fps（3秒）+ 同名 PNG 静图（双格式均保留）
 
 详见 [docs/frame-design.md](docs/frame-design.md)。
 
@@ -118,7 +125,7 @@ Remotion 失败则报错，不再降级。
 |------|----------|----------|------|
 | `tags.md` | `generate_tags.py` | 项目根目录 | 从 prompts 提取关键词，微信贴图标签 |
 | `session-log.md` | `generate_session_log.py` | 项目根目录 | Token 估算、阶段耗时、项目记录 |
-| `post.md` | `generate_post.py` | 项目根目录 | 公众号推广文案（从 manifest 提取） |
+| `post.md` / `post-*.md` | `generate_post.py` | 项目根目录 | 多平台草稿文案（默认公众号；`--platform douyin|xhs`；标题≤20；只进草稿箱） |
 
 **自动生成时机**：完整 pipeline（`--mode auto`）中，步骤 5.5/7/8 自动执行。单独运行时需手动调用对应脚本。
 
@@ -130,7 +137,7 @@ Remotion 失败则报错，不再降级。
 | 写 content-analysis / manifest / prompts | [docs/content-format.md](docs/content-format.md)、[docs/prompts-format.md](docs/prompts-format.md)（>10k 字，按需 grep：`visual_elements`、`词汇表校验`、`自检清单`、`常见错误`） |
 | AI 生成失败、provider 切换 | [docs/image-generation.md](docs/image-generation.md) |
 | Remotion 组件 / 动画 / 报错 | [docs/frame-design.md](docs/frame-design.md)、[docs/remotion-projects.md](docs/remotion-projects.md)、[docs/qa.md](docs/qa.md)「Remotion 已知问题」 |
-| 打包、封面、公众号规格 | [docs/output.md](docs/output.md) |
+| 打包、双格式、多平台草稿/定时 | [docs/output.md](docs/output.md) |
 | 交付前检查 | [docs/qa.md](docs/qa.md) + `scripts/qa_check.py` |
 | 写推广文案 copy.md | [references/copy-template.md](references/copy-template.md) |
 | 看一套完整产出长什么样 | [demo/ai-coding-assistant/](demo/ai-coding-assistant/) |

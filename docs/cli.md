@@ -72,3 +72,19 @@ python3 scripts/generate_tags.py --input sticker-manifest.md --output tags.md --
 python3 scripts/generate_session_log.py --project <name> --theme cyberpunk --sticker-count 8 --output session-log.md
 python3 scripts/generate_post.py --project ~/wechat-stickers/<project> --theme cyberpunk --output post.md
 ```
+
+## 多平台推广草稿（generate_post.py）
+
+```bash
+# 公众号 / 贴图推送（GIF 配文，默认）
+python3 scripts/generate_post.py \
+  --project ~/wechat-stickers/<project> --theme cyberpunk --platform wechat
+
+# 抖音 / 小红书（PNG 配文，标题 ≤20）
+python3 scripts/generate_post.py \
+  --project ~/wechat-stickers/<project> --theme cyberpunk --platform douyin
+python3 scripts/generate_post.py \
+  --project ~/wechat-stickers/<project> --theme cyberpunk --platform xhs
+```
+
+草稿箱规则：只进草稿；无「立即发」则定时 19:00–22:00（Asia/Shanghai）。

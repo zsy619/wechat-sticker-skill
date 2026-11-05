@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
 """
-generate_post.py - 生成微信公众号推广文档 post.md
+generate_post.py - 生成多平台贴图推广草稿（默认公众号）
 
-基于 manifest 内容生成符合微信公众号发布格式的 post.md。
+基于 manifest 生成草稿文案；只进草稿箱，不直接发布。
+无特别说明时定时窗口 19:00–22:00（Asia/Shanghai）；用户说「立即发」才立即发。
+
+平台：
+  wechat（默认）→ GIF 素材配文，输出 post.md
+  douyin / xhs  → PNG 素材配文，标题严格 ≤20 字，输出 post-douyin.md / post-xhs.md
 
 Usage:
     python3 scripts/generate_post.py \
         --project ~/wechat-stickers/opengeometry \
         --theme neon \
-        --link https://github.com/OpenGeometry-io/OpenGeometry \
+        --platform wechat \
         --output post.md
 """
 
@@ -24,16 +29,29 @@ SKILL_DIR = os.path.dirname(SCRIPT_DIR)
 
 # ── 标题模板库 ────────────────────────────────────────────
 
+# 公众号（GIF）标题模板；填充后仍截断至 ≤20 字
 TITLE_TEMPLATES = [
-    "「{project}」微信表情包上线！",
+    "「{project}」微信表情包上新",
     "{project} 专属表情包来了",
-    "程序员专属！{project} 微信表情包",
-    "{project} 趣味表情包，工程师必备",
-    "【{project}】微信贴图正式发布",
-    "这款 {project} 表情包，太适合程序员了",
-    "{project} 定制贴图，让聊天更有趣",
-    "工程师必备！{project} 主题表情包上线",
+    "{project} 趣味表情包上新",
+    "{project} 定制贴图上新",
+    "【{project}】贴图草稿待发",
+    "{project} 主题表情包上新",
 ]
+
+# 抖音 / 小红书（PNG）短标题；务必 ≤20 字
+TITLE_TEMPLATES_SHORT = [
+    "{project} 表情包上新",
+    "这套 {project} 贴图好看",
+    "{project} 静图贴图来了",
+    "存下 {project} 表情包",
+]
+
+PLATFORM_DEFAULT_OUTPUT = {
+    "wechat": "post.md",
+    "douyin": "post-douyin.md",
+    "xhs": "post-xhs.md",
+}
 
 
 # ── 平台标签（固定） ─────────────────────────────────────
@@ -192,9 +210,16 @@ def extract_project_desc(project_root):
 # ── 主函数
 
 
-def generate_title(project, theme):
-    template = random.choice(TITLE_TEMPLATES)
-    title = template.format(project=project.upper() if len(project) <= 8 else project)
+def generate_title(project, theme, platform="wechat"):
+    pool = TITLE_TEMPLATES_SHORT if platform in ("douyin", "xhs") else TITLE_TEMPLATES
+    # 短项目名优先大写，避免标题被截到半个词
+    proj = project.upper() if len(project) <= 8 else project
+    # 预留模板填充后 ≤20：过长项目名先截
+    max_proj = 12 if platform in ("douyin", "xhs") else 14
+    if len(proj) > max_proj:
+        proj = proj[:max_proj]
+    template = random.choice(pool)
+    title = template.format(project=proj)
     title = title[:20].rstrip("，、。；：")
     return title
 
@@ -263,27 +288,39 @@ def generate_tags_line(tags):
     return "#" + " #".join(selected[:8])
 
 
-def generate_post(project_root, theme, link, output, title=None, verbose=True):
-    """生成 post.md 文件（降级方案：结构化模板）"""
+def generate_post(project_root, theme, link, output, title=None, verbose=True, platform="wechat"):
+    """生成多平台推广草稿（结构化模板）；只进草稿箱。"""
+
+    platform = (platform or "wechat").lower()
+    if platform not in PLATFORM_DEFAULT_OUTPUT:
+        raise ValueError(f"unsupported platform: {platform}")
 
     info = extract_info(project_root, theme, link)
 
     if not title:
-        title = generate_title(info["project"], theme)
+        title = generate_title(info["project"], theme, platform=platform)
     if title:
         title = title[:20].rstrip("，、。；：")
 
     content = generate_content(info)
     tags_line = generate_tags_line(info["tags"])
+    asset = "gif" if platform == "wechat" else "png"
 
     doc = f"""---
 name: {info['project']}-post
 title: {title}
 theme: {theme}
+platform: {platform}
+asset: {asset}
+status: draft
+schedule_window: 19:00-22:00 Asia/Shanghai
 date: {date.today().isoformat()}
 tags: {tags_line}
 link: {link or ''}
 ---
+
+> 草稿箱文案。无「立即发」则定时 19:00–22:00（Asia/Shanghai）。
+> 配图：{'公众号/贴图推送用同序号 GIF' if platform == 'wechat' else '抖音/小红书用同序号 PNG（标题已 ≤20 字）'}。
 
 {content}
 
@@ -297,9 +334,9 @@ link: {link or ''}
         f.write(doc)
 
     if verbose:
-        print(f"✅ post.md 已生成（模板模式）: {output}")
-        print(f"   标题: {title}（{len(title)}字）")
-        print(f"   贴图: {info['count']} 张")
+        print(f"✅ 推广草稿已生成（{platform}/{asset}）: {output}")
+        print(f"   标题: {title}（{len(title)}字，上限20）")
+        print(f"   贴图: {info['count']} 张｜状态: 草稿箱｜窗口: 19:00-22:00 Asia/Shanghai")
         print(f"   标签: {tags_line}")
 
     return True
@@ -307,12 +344,15 @@ link: {link or ''}
 
 def main():
     parser = argparse.ArgumentParser(
-        description="生成微信公众号推广文档 post.md")
+        description="生成多平台贴图推广草稿（默认公众号；只进草稿箱）")
     parser.add_argument("--project", required=True, help="项目目录")
     parser.add_argument("--theme", required=True, help="主题")
     parser.add_argument("--link", default="", help="项目链接")
+    parser.add_argument("--platform", default="wechat",
+                       choices=["wechat", "douyin", "xhs"],
+                       help="wechat=GIF 配文；douyin/xhs=PNG 配文，标题≤20")
     parser.add_argument("--output", default=None,
-                       help="post.md 输出路径（verify 模式可不指定）")
+                       help="输出路径（默认 post.md / post-douyin.md / post-xhs.md）")
     parser.add_argument("--title", default=None, help="自定义标题（不超过20字符）")
     parser.add_argument("--quiet", action="store_true")
     parser.add_argument("--verify", action="store_true",
@@ -337,9 +377,10 @@ def main():
         print(f"\n{'✅ 所有依赖文件就绪' if all_ok else '❌ 缺少依赖文件'}")
         return 0 if all_ok else 1
 
-    # verify 之后 output 必须有值
-    if not args.output:
-        parser.error("--output 在生成模式下为必填参数")
+    output = args.output or PLATFORM_DEFAULT_OUTPUT[args.platform]
+    # 相对路径落到项目根，避免写到调用 cwd
+    if not os.path.isabs(output):
+        output = os.path.join(os.path.abspath(args.project), output)
 
     return (
         0
@@ -347,9 +388,10 @@ def main():
             project_root=os.path.abspath(args.project),
             theme=args.theme,
             link=args.link,
-            output=args.output,
+            output=output,
             title=args.title,
             verbose=not args.quiet,
+            platform=args.platform,
         )
         else 1
     )
