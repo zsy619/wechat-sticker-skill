@@ -19,7 +19,7 @@ python3 scripts/qa_check.py \
 |--------|------|------|
 | 文件尺寸 | 自动 | 所有贴图必须 1080×1440px |
 | 文件格式 | 自动 | 必须为 PNG 或 GIF |
-| 文件名格式 | 自动 | 必须符合 `{num}-{name}.png` |
+| 文件名格式 | 自动 | 必须符合 `{num}-{name}.png` 或 `.gif` |
 | 词汇表校验 | 自动 | visual_elements 中的 key 必须在词汇表范围内 |
 | 文件完整性 | 自动 | 所有 prompts 对应的输出文件必须存在 |
 
@@ -37,7 +37,7 @@ python3 scripts/qa_check.py \
 - [ ] 内容聚合分析完整准确
 - [ ] 标签推荐覆盖全面（每张≥5个标签）
 - [ ] 同一项目多风格生成（如需）：分别存放于 `assets-{theme}/` 目录
-- [ ] token-stats.md 统计文件已生成
+- [ ] session-log.md 统计文件已生成（模板见 references/token-stats.md）
 
 ---
 

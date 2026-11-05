@@ -11,7 +11,7 @@
                    ↓
 ┌─────────────────────────────────────────┐
 │  阶段二：Remotion 帧导出（第二选择）     │
-│  每张贴图 = <Still>组件 → 导出 GIF 动画│
+│  每张贴图 = <Composition> → render 导出 GIF│
 │  失败 → 报错停止（不再降级）           │
 └─────────────────────────────────────────┘
 ```
@@ -76,7 +76,7 @@ prompts/*.md
     ↓
 创建 remotion/{sticker-name}/ 项目
     ↓
-npx remotion still → PNG
+npx remotion render → GIF
     ↓
 输出到 assets/
 ```

@@ -1,6 +1,6 @@
 ---
 name: wechat-sticker-skill
-description: Create WeChat emoji sticker series from any input (URL, topic, or content). Use when user asks to "做微信贴图", "微信贴图", "创建微信贴图包", "WeChat stickers", "微信emoji", "根据内容生成贴图", "做一套贴图", "生成贴图". Triggers on sticker creation, emoji design, reaction images, or any WeChat sticker-related request.
+description: Create WeChat emoji sticker series from any input (URL, topic, or content). Use when user asks to "做微信贴图", "微信贴图", "创建微信贴图包", "WeChat stickers", "微信emoji", "根据内容生成贴图", "做一套贴图", "生成贴图". Triggers on sticker creation, emoji design, reaction images, or any WeChat sticker-related request, including "表情包", "公众号贴图", "贴图推送". Bundled scripts/ pipeline (AI → Remotion fallback) outputs 1080×1440 GIF/PNG stickers, ZIP, tags.md and a 公众号 post.md.
 version: 4.9.6
 tags: ["微信", "贴图", "表情包", "微信表情包", "微信贴图", "帧动画", "图片生成"]
 metadata:
@@ -9,11 +9,16 @@ metadata:
 
 ---
 
-> **更新日志**：所有变更记录在 [CHANGELOG.md](./CHANGELOG.md)。
-
 # 微信贴图生成器 v4.9.6 (WeChat Sticker Creator)
 
 本技能根据用户输入（链接、主题或内容），自动进行内容聚合、贴图设计和生成，输出一套完整的微信表情包。
+
+## 开工确认（多步任务第一步）
+
+运行 pipeline 前先回一句："我计划用 `--theme <风格>` 生成约 N 张贴图，输入类型是 URL/主题/文本，图像走 AI（会调用付费接口）→ 失败再走 Remotion，输出到 `~/wechat-stickers/<slug>/`。现在开始吗？"，用户确认后再执行。
+用户或调度 bot 已明确给出主题 + 风格（+ 数量）时视为已确认，直接执行。
+
+完成标志：`scripts/qa_check.py` 退出码为 0，且输出图片数 = prompts 数；未达标不交付、不进入打包与推广文档。
 
 ## 核心设计：两段式图像生成
 
@@ -41,43 +46,21 @@ metadata:
 ## skill 项目结构
 
 ```
-wechat-stickers/                    ← 技能根目录
-│
+wechat-sticker-skill/                     ← 技能根目录
 ├── SKILL.md                              ← 入口文件
-├── CHANGELOG.md                          ← 更新日志
-│
-│   ├── remotion/
-│   │   ├── template/
-│   │   │   ├── index.tsx                     ← registerRoot 入口模板
-│   │   │   ├── StickerComponent.tsx         ← 外层组件模板（返回 <Composition>）
-│   │   │   └── StickerContent.tsx           ← 核心动画逻辑（自包含所有主题配置）
-│   │   └── styles/
-│   │       └── base.css                     ← 全局 CSS 重置（仅 body/margin 重置）
-│
-├── scripts/
-│   ├── _vocab.py                         ← 共享词汇表模块（VOCABULARY + THEMES）[共享数据源]
-│   ├── run_full_pipeline.py              ← 完整工作流串联入口（一次性执行全流程）
-│   ├── generate_content_analysis.py      ← 节点①：内容聚合分析（URL/主题/文本 → content-analysis.md）
-│   ├── generate_manifest.py               ← 节点②：manifest 生成（含 vocabulary 校验）
-│   ├── generate_prompts.py               ← 节点③：prompts 文件生成（含 vocabulary 校验）
-│   ├── generate_frames.py                ← 节点④：图片生成（AI → Remotion 两段式）
-│   ├── pack_stickers.py                  ← 节点⑤：打包 ZIP + 生成封面/缩略图
-│   ├── qa_check.py                       ← 节点⑥：QA 自动化检查（尺寸/格式/词汇表）
-│   ├── generate_tags.py                  ← 标签生成（从 prompts 提取关键词）
-│   ├── generate_session_log.py            ← Session Log 生成（token 估算 + 阶段记录）
-│   └── generate_post.py                   ← 公众号推广文档（从 manifest 提取贴图详情）
-│
-└── docs/                                ← 技能内部参考文档（不复制到项目）
-    ├── workflow.md                       ← 核心工作流
-    ├── prompts-format.md                ← Prompt 生成规范
-    ├── content-format.md                ← 内容格式（content-analysis / manifest / prompts）
-    ├── frame-design.md                  ← Remotion 帧设计规范
-    ├── remotion-projects.md             ← Remotion 项目完整结构
-    ├── project-structure.md              ← 项目目录结构
-    ├── image-generation.md              ← 两段式图像生成流程
-    ├── output.md                        ← 最终输出与打包
-    ├── qa.md                            ← 质量检查
-
+├── remotion/template/                    ← index.tsx / StickerComponent.tsx / StickerContent.tsx 模板
+├── remotion/styles/base.css             ← 全局 CSS 重置
+├── scripts/                              ← 黑盒脚本（只看 --help，不读源码）
+│   ├── run_full_pipeline.py              ← 完整工作流入口
+│   ├── generate_content_analysis.py / generate_manifest.py / generate_prompts.py
+│   ├── generate_frames.py                ← 图片生成（AI → Remotion）
+│   ├── pack_stickers.py / qa_check.py    ← 打包 / QA
+│   ├── generate_tags.py / generate_session_log.py / generate_post.py
+│   └── _vocab.py                         ← 共享词汇表（VOCABULARY + THEMES）
+├── docs/                                 ← 参考文档（按下方索引按需读，不复制到项目）
+├── references/                           ← copy.md / token-stats 模板
+├── evals/                                ← 评测用例
+└── demo/ai-coding-assistant/            ← 满分样板项目（仿结构，不抄内容）
 ```
 
 ## 项目目录结构
@@ -93,65 +76,9 @@ python3 scripts/run_full_pipeline.py \
   --input "AI编程助手" \
   --output ~/wechat-stickers/ai-coding-assistant \
   --theme cyberpunk
-
-# ── 分步执行（调试用）───────────────────────────────────
-# 步骤1：内容聚合分析
-python3 scripts/generate_content_analysis.py \
-  --input "AI编程助手" \
-  --output ~/wechat-stickers/ai-coding-assistant/
-
-# 步骤2：生成 manifest
-python3 scripts/generate_manifest.py \
-  --input ~/wechat-stickers/ai-coding-assistant/content-analysis.md \
-  --output ~/wechat-stickers/ai-coding-assistant/sticker-manifest.md
-
-# 步骤3：生成 prompts
-python3 scripts/generate_prompts.py \
-  --input ~/wechat-stickers/ai-coding-assistant/sticker-manifest.md \
-  --output ~/wechat-stickers/ai-coding-assistant/prompts/
-
-# 步骤4：图片生成（两段式：AI → Remotion）
-python3 scripts/generate_frames.py \
-  --input ~/wechat-stickers/ai-coding-assistant/prompts/ \
-  --output ~/wechat-stickers/ai-coding-assistant/assets-cyberpunk/ \
-  --theme cyberpunk
-
-# 步骤5：打包 + QA 检查
-python3 scripts/pack_stickers.py \
-  --input ~/wechat-stickers/ai-coding-assistant/assets-cyberpunk/ \
-  --output ~/wechat-stickers/ai-coding-assistant/stickers.zip
-
-python3 scripts/qa_check.py \
-  --input ~/wechat-stickers/ai-coding-assistant/assets-cyberpunk/ \
-  --vocabulary docs/prompts-format.md
 ```
 
-### --mode 参数
-
-`generate_frames.py` 支持强制指定生成模式：
-
-| 值 | 行为 |
-|----|------|
-| `auto`（默认） | AI → Remotion 两段式 |
-| `ai` | 仅 AI 生成，失败则整张贴图失败 |
-| `remotion` | 仅 Remotion 生成，失败则报错 |
-
-### 新增参数（v4.4.0）
-
-| 参数 | 说明 |
-|------|------|
-| `--continue-on-error` | 某张贴图失败时跳过继续处理下一张 |
-| `--debug-remotion` | 保留 Remotion 调试文件（TSX 源码写入 `debug/` 目录） |
-| `--template-dir` | 自定义 Remotion 模板目录（覆盖内置模板 `remotion/template/`） |
-| `--remotion-version` | 指定 Remotion 版本（default: `4.0.448`） |
-| `--dry-run` | 仅解析 `.md` 文件并打印生成计划，不生成任何文件 |
-
-`pack_stickers.py` 参数：
-
-| 参数 | 说明 |
-|------|------|
-| `--gif-only` | 只打包 GIF 文件，忽略 PNG/JPG |
-| `--png-only` | 只打包 PNG 文件，忽略 GIF/JPG |
+分步执行、`--mode` / `--continue-on-error` / `--dry-run` / `--gif-only` 等参数、补跑命令 → [docs/cli.md](docs/cli.md)。
 
 ## 核心概念
 
@@ -195,21 +122,17 @@ Remotion 失败则报错，不再降级。
 
 **自动生成时机**：完整 pipeline（`--mode auto`）中，步骤 5.5/7/8 自动执行。单独运行时需手动调用对应脚本。
 
-**补跑命令**：pipeline 中断后，可使用以下命令单独生成缺失文档：
-```bash
-python3 scripts/generate_tags.py --input sticker-manifest.md --output tags.md --theme cyberpunk
-python3 scripts/generate_session_log.py --project <name> --theme cyberpunk --sticker-count 8 --output session-log.md
-python3 scripts/generate_post.py --project ~/wechat-stickers/<project> --theme cyberpunk --output post.md
-```
+## 文档索引（何时读哪份）
 
-## 详细文档
-
-- **Remotion 帧设计** → [docs/frame-design.md](docs/frame-design.md)
-- **Remotion 项目结构** → [docs/remotion-projects.md](docs/remotion-projects.md)
-- **项目目录结构** → [docs/project-structure.md](docs/project-structure.md)
-- **工作流与规范** → [docs/workflow.md](docs/workflow.md)
-- **内容格式** → [docs/content-format.md](docs/content-format.md)
-    - **Prompt 生成规范** → [docs/prompts-format.md](docs/prompts-format.md)
-- **图片生成** → [docs/image-generation.md](docs/image-generation.md)
-- **输出与发布** → [docs/output.md](docs/output.md)
-- **质量保障** → [docs/qa.md](docs/qa.md)
+| 场景 | 读哪份 |
+|---|---|
+| 判断输入类型（URL/主题/文本）、命名、目录冲突 | [docs/workflow.md](docs/workflow.md) |
+| 写 content-analysis / manifest / prompts | [docs/content-format.md](docs/content-format.md)、[docs/prompts-format.md](docs/prompts-format.md)（>10k 字，按需 grep：`visual_elements`、`词汇表校验`、`自检清单`、`常见错误`） |
+| AI 生成失败、provider 切换 | [docs/image-generation.md](docs/image-generation.md) |
+| Remotion 组件 / 动画 / 报错 | [docs/frame-design.md](docs/frame-design.md)、[docs/remotion-projects.md](docs/remotion-projects.md)、[docs/qa.md](docs/qa.md)「Remotion 已知问题」 |
+| 打包、封面、公众号规格 | [docs/output.md](docs/output.md) |
+| 交付前检查 | [docs/qa.md](docs/qa.md) + `scripts/qa_check.py` |
+| 写推广文案 copy.md | [references/copy-template.md](references/copy-template.md) |
+| 看一套完整产出长什么样 | [demo/ai-coding-assistant/](demo/ai-coding-assistant/) |
+| 项目目录 | [docs/project-structure.md](docs/project-structure.md) |
+| 命令与参数 | [docs/cli.md](docs/cli.md) |

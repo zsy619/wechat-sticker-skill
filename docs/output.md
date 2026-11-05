@@ -92,15 +92,15 @@ python3 scripts/pack_stickers.py \
 - `stickers-cyberpunk.zip` — 所有贴图 PNG 打包
 - `cover-900x383.png` — 公众号封面（可选）
 - `thumbnail-200x267.png` — 文末缩略图（可选）
-- `docs/tags.md` — 标签推荐文档（**自动生成**，由 `generate_tags.py` 在步骤 5.5 生成）
+- `tags.md`（项目根目录）— 标签推荐文档（**自动生成**，由 `generate_tags.py` 在步骤 5.5 生成）
 
 ### 标签生成
 
-`docs/tags.md` 由 `run_full_pipeline.py` 步骤 5.5 自动生成（`--with-tags`，默认开启），无需手动执行。
+`tags.md`（项目根目录）由 `run_full_pipeline.py` 步骤 5.5 自动生成（`--with-tags`，默认开启），无需手动执行。
 
 独立使用：
 ```bash
 python3 scripts/generate_tags.py \
   --input sticker-manifest.md \
-  --output docs/tags.md
+  --output tags.md
 ```

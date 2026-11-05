@@ -85,7 +85,7 @@
 
 ## Session Log 记录规范 {#session-log-记录规范}
 
-每次生成贴图包**自动生成** `docs/session-log.md`，由 `scripts/generate_session_log.py` 在工作流末尾执行（`--with-session-log`，默认开启）。
+每次生成贴图包**自动生成** `session-log.md`（项目根目录），由 `scripts/generate_session_log.py` 在工作流末尾执行（`--with-session-log`，默认开启）。
 
 ### 必须记录的字段
 
@@ -121,7 +121,7 @@
 
 ## Tags 标签记录规范 {#tags-标签记录规范}
 
-每次生成贴图包**自动生成** `docs/tags.md`，由 `scripts/generate_tags.py` 在工作流步骤 5.5 执行（`--with-tags`，默认开启）。
+每次生成贴图包**自动生成** `tags.md`（项目根目录），由 `scripts/generate_tags.py` 在工作流步骤 5.5 执行（`--with-tags`，默认开启）。
 
 ### 功能
 
@@ -154,7 +154,7 @@
 ```bash
 python3 scripts/generate_tags.py \
     --input sticker-manifest.md \
-    --output docs/tags.md \
+    --output tags.md \
     --theme neon
 ```
 
@@ -164,4 +164,4 @@ Remotion 在 frame 2500-3000 时 Chrome headless 可能崩溃。如需渲染超�
 
 1. **分段渲染**：每段 30 秒，分别导出后用 ffmpeg 拼接
 2. **简化动画**：减少每帧动画元素数量，用 CSS 渐变替代动画 SVG
-3. **指定系统 Chrome**：避免 SSL 证书问题（详见 [qa.md](../qa.md#remotion-已知问题)）
+3. **指定系统 Chrome**：避免 SSL 证书问题（详见 [qa.md](qa.md#remotion-已知问题)）
