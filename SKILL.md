@@ -1,6 +1,10 @@
 ---
 name: wechat-sticker-skill
 description: Create WeChat emoji sticker series from any input (URL, topic, or content). Use when user asks to "做微信贴图", "微信贴图", "创建微信贴图包", "WeChat stickers", "微信emoji", "根据内容生成贴图", "做一套贴图", "生成贴图". Triggers on sticker creation, emoji design, reaction images, or any WeChat sticker-related request, including "表情包", "公众号贴图", "贴图推送". Bundled scripts/ pipeline (AI → Remotion fallback) outputs 1080×1440 GIF/PNG stickers, ZIP, tags.md and a 公众号 post.md.
+display_name: "微信贴图生成器"
+display_name_en: "WeChat Sticker Creator"
+description_zh: "根据链接、主题或文本制作微信贴图与表情包；适用于贴图创作、表情设计和公众号贴图需求。使用内置脚本流程，优先 AI 图像生成，失败后尝试 Remotion；输出 1080×1440 GIF/PNG 双格式贴图、ZIP、标签及多平台草稿文案，不自动发布。"
+description_en: "Create WeChat sticker and emoji sets from a URL, topic, or text. Use for sticker creation, emoji design, and WeChat Official Account sticker requests. The bundled script pipeline uses AI image generation first, then Remotion on failure. Outputs 1080×1440 GIF/PNG stickers, a ZIP archive, tags, and draft copy for multiple platforms; does not automatically publish."
 version: 4.9.6
 tags: ["微信", "贴图", "表情包", "微信表情包", "微信贴图", "帧动画", "图片生成"]
 metadata:
